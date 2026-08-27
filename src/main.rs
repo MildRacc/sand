@@ -79,7 +79,7 @@ impl World
            
             let now = SystemTime::now();
 
-            if now.duration_since(self.time).unwrap().as_millis() > 10
+            if now.duration_since(self.time).unwrap().as_millis() > 25
             {
                 self.step();
                 self.time = now;
@@ -98,9 +98,6 @@ impl World
         self.canvas.clear();
 
         //let pb = &mut self.pixelbuf;
-        let mut sand_pixel_draw_buf: Vec<FRect> = Vec::new();
-        let mut water_pixel_draw_buf: Vec<FRect> = Vec::new();
-        let mut gas_pixel_draw_buf: Vec<FRect> = Vec::new();
 
         'y: for y in (0..HEIGHT as usize).rev()
         {
@@ -109,22 +106,36 @@ impl World
                 let mut p = self.pixel_matrix.get(x, y);
                 p.update(x, y, &mut self.pixel_matrix);
                 
-                match &self.pixel_matrix.screen[x][y].ptype
-                {
-                    ParticleType::Sand => {sand_pixel_draw_buf.push(FRect::new(x as f32, y as f32, 1.0, 1.0));},
-                    ParticleType::Water => {water_pixel_draw_buf.push(FRect::new(x as f32, y as f32, 1.0, 1.0));},
-                    ParticleType::Empty => {},
-                }
                 continue 'x;
 
             }
         }
+
 
         for w in self.pixel_matrix.screen.iter_mut()
         {
             for h in w.iter_mut()
             {
                 h.just_moved = false;
+            }
+        }
+
+        let mut sand_pixel_draw_buf: Vec<FRect> = Vec::new();
+        let mut water_pixel_draw_buf: Vec<FRect> = Vec::new();
+        let mut gas_pixel_draw_buf: Vec<FRect> = Vec::new();
+
+
+        for x in 0..WIDTH as usize
+        {
+            for y in 0..HEIGHT as usize
+            {
+
+                match &self.pixel_matrix.screen[x][y].ptype
+                {
+                    ParticleType::Sand => {sand_pixel_draw_buf.push(FRect::new(x as f32, y as f32, 1.0, 1.0));},
+                    ParticleType::Water => {water_pixel_draw_buf.push(FRect::new(x as f32, y as f32, 1.0, 1.0));},
+                    ParticleType::Empty => {},
+                }
             }
         }
 

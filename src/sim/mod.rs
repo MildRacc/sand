@@ -1,4 +1,5 @@
 pub mod particles;
+pub mod rand;
 use particles::{Particle, ParticleBase, ParticleType, ParticleState};
 use particles::{EMPTY, SAND, WATER};
 

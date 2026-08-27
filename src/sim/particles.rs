@@ -1,4 +1,4 @@
-use crate::sim::{HEIGHT, PixelMatrix, WIDTH};
+use crate::sim::{HEIGHT, PixelMatrix, WIDTH, rand::rand};
 
 pub static EMPTY: ParticleBase = ParticleBase::new(0);
 pub static SAND: ParticleBase = ParticleBase::new(2);
@@ -87,7 +87,26 @@ impl Particle
             return;
         }
 
-        if x+1 < WIDTH as usize && mat.get(x+1, y+1).base.density < curr.base.density
+        let dr_goable: bool = x+1 < WIDTH as usize && mat.get(x+1, y+1).base.density < curr.base.density;
+        let dl_goable: bool = x > 0 && mat.get(x-1, y+1).base.density < curr.base.density;
+
+        if dr_goable && dl_goable
+        {
+            if rand() & 1 == 0
+            { // Go Down Right
+                mat.swap(x, y, x+1, y+1);
+                mat.screen[x+1][y+1].just_moved = true;
+                return;
+            }
+            else
+            { // Go Down Left
+                mat.swap(x, y, x-1, y+1);
+                mat.screen[x-1][y+1].just_moved = true;
+                return;
+            }
+        }
+
+        if dr_goable
         {
             mat.swap(x, y, x+1, y+1);
             mat.screen[x+1][y+1].just_moved = true;
@@ -109,6 +128,7 @@ impl Particle
        
         self.just_moved = true;
         let curr = &mat.get(x, y);
+        let curr_density = curr.base.density;
 
 
         if mat.get(x, y+1).base.density < curr.base.density
@@ -118,16 +138,27 @@ impl Particle
             return;
         }
 
-        if x+1 < WIDTH as usize && mat.get(x+1, y+1).base.density < curr.base.density
+
+        if y > 0 && mat.get(x, y-1).base.density < curr_density
+        {
+            let ur_goable = x+1 < WIDTH as usize && mat.get(x+1, y-1).base.density < curr_density;
+            let ul_goable = x > 0 && mat.get(x-1, y-1).base.density < curr_density;
+        
+            if ur_goable && ul
+
+        }
+
+
+        if x+1 < WIDTH as usize && mat.get(x+1, y+1).base.density < curr_density 
         {
             mat.swap(x, y, x+1, y+1);
-            mat.screen[x][y+1].just_moved = true;
+            mat.screen[x+1][y+1].just_moved = true;
             return;
         }
-        if x > 0 && mat.get(x-1, y+1).base.density < curr.base.density
+        if x > 0 && mat.get(x-1, y+1).base.density < curr_density 
         {
             mat.swap(x, y, x-1, y+1);
-            mat.screen[x][y+1].just_moved = true;
+            mat.screen[x-1][y+1].just_moved = true;
             return;
         }
 
@@ -137,10 +168,10 @@ impl Particle
             mat.screen[x][y+1].just_moved = true;
             return
         }
-        if x-1 < WIDTH as usize && mat.get(x-1, y).base.density == 0
+        if x > 0 && mat.get(x-1, y).base.density == 0
         {
             mat.swap(x, y, x-1, y);
-            mat.screen[x][y+1].just_moved = true;
+            mat.screen[x-1][y].just_moved = true;
             return
         }
     }
